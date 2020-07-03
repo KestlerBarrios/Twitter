@@ -5,14 +5,25 @@ const jwt = require('../services/jwt')
 
 const User = require('../models/User')
 
+exports.commands = function(){
+    var option = String
+    switch (option) {
+        case register:
+            exports.registerUser
+            break;
+    
+        default:
+            break;
+    }
+}
+
 exports.registerUser = function (req, res) {
     var user = new User()
     var params = req.body
 
-    if (params.name && params.userName && password.password) {
-        user.name = params.name
+    if (params.userName && params.password) {
         user.userName = params.userName
-        User.find({ $or: { user: user.user } }).exec((err, users) => {
+        User.find({ userName: user.userName  }).exec((err, users) => {
             if (err) return res.status(500).send({ message: 'Error en la peticion.' })
             if (users && users.length >= 1) {
                 return res.status(500).send({ message: 'El Usuario ya existe.' })
@@ -20,9 +31,9 @@ exports.registerUser = function (req, res) {
                 bcrypt.hash(params.password, null, null, (err, hash) => {
                     user.password = hash
                     user.save((err, userSave) => {
-                        if (err) return res.status(500).send({ message: 'Error al guardar el Administrador.' })
+                        if (err) return res.status(500).send({ message: 'Error al guardar el Usuario.' })
                         if (userSave) {
-                            res.status(200).send({ admin: userSave })
+                            res.status(200).send({ usuario: userSave })
                         } else {
                             res.status(404).send({ message: `No se ha podido registrar ${params.nombre} ` })
                         }
@@ -80,8 +91,20 @@ exports.deleteUser = function (req, res) {
         return res.status(500).send({ message: 'No posee los permisos para eliminar el Usuario' })
     }
 
-    User.findByIdAndDelete(userId, (err, userDeleted)=>{
+    User.findByIdAndDelete(userId, (err, userDeleted) => {
         if (err) return res.status(500).send({ message: 'Error al borrar el Usuario' })
         return res.status(200).send({ message: 'Usuario Eliminado', user: userDeleted })
     })
+}
+
+exports.PROFILE = function (username){
+
+}
+
+exports.FOLLOW = function(username){
+
+}
+
+exports.UNFOLLOW = function(username){
+
 }

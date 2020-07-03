@@ -2,11 +2,11 @@
 
 const express = require('express')
 
-const userController = require('../controllers/userController')
+const userController = require('../controller/userController')
 const md_auth = require('../middlewares/authenticated')
 
 var api = express.Router()
 
-api.post('/commands', md_auth.ensureAuth, userController)
+api.post('/commands', userController.editUser)
 
 module.exports = api
