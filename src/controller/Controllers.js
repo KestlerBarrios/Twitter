@@ -5,25 +5,25 @@ const jwt = require('../services/jwt')
 
 const User = require('../models/User')
 
-exports.commands = function(){
+exports.commands = function () {
     var option = String
     switch (option) {
         case register:
-            exports.registerUser
+            exports.REGISTER
             break;
-    
+
         default:
             break;
     }
 }
 
-exports.registerUser = function (req, res) {
+exports.REGISTER = function (req, res) {
     var user = new User()
     var params = req.body
 
     if (params.userName && params.password) {
         user.userName = params.userName
-        User.find({ userName: user.userName  }).exec((err, users) => {
+        User.find({ userName: user.userName }).exec((err, users) => {
             if (err) return res.status(500).send({ message: 'Error en la peticion.' })
             if (users && users.length >= 1) {
                 return res.status(500).send({ message: 'El Usuario ya existe.' })
@@ -46,7 +46,7 @@ exports.registerUser = function (req, res) {
 
 }
 
-exports.login = function (req, res) {
+exports.LOGIN = function (req, res) {
     const params = req.body
     User.findOne({ userName: params.userName }, (err, user) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })
@@ -97,14 +97,18 @@ exports.deleteUser = function (req, res) {
     })
 }
 
-exports.PROFILE = function (username){
+exports.PROFILE = function (req, res) {
+    var params = req.body
+    User.findOne({ userName: params.username }).exec((err, profile) => {
+        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+        return res.status(200).send({ perfil: profile })
+    })
+}
+
+exports.FOLLOW = function (username) {
 
 }
 
-exports.FOLLOW = function(username){
-
-}
-
-exports.UNFOLLOW = function(username){
+exports.UNFOLLOW = function (username) {
 
 }
