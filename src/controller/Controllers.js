@@ -4,42 +4,46 @@ const bcrypt = require('bcrypt-nodejs')
 const jwt = require('../services/jwt')
 
 const User = require('../models/User')
-var arrayCommands = []
+const tweetController = require('../controller/tweetController')
+var arrayC = []
 
 exports.commands = function (req, res) {
     var params = req.body
-    arrayCommands = params.commands.split(" ")
-    switch (arrayCommands[0]) {
+    arrayC = params.commands.split(" ")
+    switch (arrayC[0]) {
         case "register":
             REGISTER(req, res)
             break;
         case "login":
-            LOGIN(req,res)
+            LOGIN(req, res)
             break;
         case "edituser":
-            editUser(req,res)
+            editUser(req, res)
             break;
         case "deleteuser":
-            deleteUser(req,res)
+            deleteUser(req, res)
             break;
         case "profile":
-            profile(req,res)
+            PROFILE(req, res)
             break;
         case "follow":
-            FOLLOW(req,res)
+            FOLLOW(req, res)
             break;
         case "unfollow":
-            UNFOLLOW(req,res)
+            UNFOLLOW(req, res)
+            break;
+        case "add_tweet":
+            tweetController.ADD_TWEET(req, res, arrayC)
             break;
         default:
-            res.status(404).send({message: "Codigo invalido"})
+            res.status(404).send({ message: "Codigo invalido" })
             break;
     }
 }
 
 function REGISTER(req, res) {
-    var username = arrayCommands[1]
-    var password = arrayCommands[3]
+    var username = arrayC[1]
+    var password = arrayC[3]
     var user = new User()
     if (username && password) {
         user.userName = username
@@ -67,18 +71,18 @@ function REGISTER(req, res) {
 }
 
 function LOGIN(req, res) {
-    var username = arrayCommands[1]
-    var password = arrayCommands[2]
+    var username = arrayC[1]
+    var password = arrayC[2]
     User.findOne({ userName: username }, (err, user) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })
         if (user) {
             bcrypt.compare(password, user.password, (err, check) => {
                 if (check) {
-                    if (arrayCommands[3]) {
+                    if (arrayC[3]) {
                         return res.status(200).send({ token: jwt.createToken(user) })
                     } else {
                         user.password = undefined
-                        return res.status(200).send({ user : user })
+                        return res.status(200).send({ user: user })
                     }
                 } else {
                     res.status(404).send({ message: 'El usuario no se ha podido identificar.' })
@@ -91,7 +95,6 @@ function LOGIN(req, res) {
 }
 
 function editUser(req, res) {
-    const userId = req.params.id
     const params = req.body
 
     if (userId != req.user.sub) {
@@ -119,8 +122,7 @@ function deleteUser(req, res) {
 }
 
 function PROFILE(req, res) {
-    var params = req.body
-    User.findOne({ userName: params.username }).exec((err, profile) => {
+    User.findOne({ userName: arrayC[1] }).exec((err, profile) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })
         return res.status(200).send({ perfil: profile })
     })

@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 var TweetSchema = Schema({
-    userName: {type: Schema.ObjectId, ref: 'usuario'},
+    userName: String,
     text: String,
 })
 
