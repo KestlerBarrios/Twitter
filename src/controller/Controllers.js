@@ -35,6 +35,15 @@ exports.commands = function (req, res) {
         case "add_tweet":
             tweetController.ADD_TWEET(req, res, arrayC)
             break;
+        case "delete_tweet":
+            tweetController.DELETE_TWEET(req, res, arrayC)
+            break;
+        case "edit_tweet":
+            tweetController.EDIT_TWEET(req, res, arrayC)
+            break;
+        case "view_tweet":
+            tweetController.VIEW_TWEETS(req, res, arrayC)
+            break;
         default:
             res.status(404).send({ message: "Codigo invalido" })
             break;
@@ -95,43 +104,45 @@ function LOGIN(req, res) {
 }
 
 function editUser(req, res) {
-    const params = req.body
 
     if (userId != req.user.sub) {
         return res.status(500).send({ message: 'No posee los permisos para actualizar el Usuario' })
+    } else if (users && users.length >= 1) {
+        return res.status(500).send({ message: 'El Usuario ya existe.' })
+    } else {
+
+        User.findByIdAndUpdate(userId, params, { new: true }, (err, userUpdated) => {
+            if (err) return res.status(500).send({ message: 'Error en la peticion' })
+            if (!userUpdated) return res.status(404).send({ message: 'No se ha podido editar el Usuario' })
+            return res.status(200).send({ admin: userUpdated })
+        })
+
+    }
+}
+
+    function deleteUser(req, res) {
+        const userId = req.params.id
+        if (userId != req.user.sub) {
+            return res.status(500).send({ message: 'No posee los permisos para eliminar el Usuario' })
+        }
+
+        User.findByIdAndDelete(userId, (err, userDeleted) => {
+            if (err) return res.status(500).send({ message: 'Error al borrar el Usuario' })
+            return res.status(200).send({ message: 'Usuario Eliminado', user: userDeleted })
+        })
     }
 
-    User.findByIdAndUpdate(userId, params, { new: true }, (err, userUpdated) => {
-        if (err) return res.status(500).send({ message: 'Error en la peticion' })
-        if (!userUpdated) return res.status(404).send({ message: 'No se ha podido editar el Usuario' })
-        return res.status(200).send({ admin: userUpdated })
-    })
-
-}
-
-function deleteUser(req, res) {
-    const userId = req.params.id
-    if (userId != req.user.sub) {
-        return res.status(500).send({ message: 'No posee los permisos para eliminar el Usuario' })
+    function PROFILE(req, res) {
+        User.findOne({ userName: arrayC[1] }).exec((err, profile) => {
+            if (err) return res.status(500).send({ message: 'Error en la peticion' })
+            return res.status(200).send({ perfil: profile })
+        })
     }
 
-    User.findByIdAndDelete(userId, (err, userDeleted) => {
-        if (err) return res.status(500).send({ message: 'Error al borrar el Usuario' })
-        return res.status(200).send({ message: 'Usuario Eliminado', user: userDeleted })
-    })
-}
+    function FOLLOW(username) {
 
-function PROFILE(req, res) {
-    User.findOne({ userName: arrayC[1] }).exec((err, profile) => {
-        if (err) return res.status(500).send({ message: 'Error en la peticion' })
-        return res.status(200).send({ perfil: profile })
-    })
-}
+    }
 
-function FOLLOW(username) {
+    function UNFOLLOW(username) {
 
-}
-
-function UNFOLLOW(username) {
-
-}
+    }
