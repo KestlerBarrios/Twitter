@@ -84,8 +84,13 @@ function LOGIN(req, res) {
     var password = arrayC[2]
     User.findOne({ userName: username }, (err, user) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })
+        console.log(user);
         if (user) {
             bcrypt.compare(password, user.password, (err, check) => {
+                console.log(password);
+                console.log(user.password);
+                
+                
                 if (check) {
                     if (arrayC[3]) {
                         return res.status(200).send({ token: jwt.createToken(user) })
@@ -120,29 +125,29 @@ function editUser(req, res) {
     }
 }
 
-    function deleteUser(req, res) {
-        const userId = req.params.id
-        if (userId != req.user.sub) {
-            return res.status(500).send({ message: 'No posee los permisos para eliminar el Usuario' })
-        }
-
-        User.findByIdAndDelete(userId, (err, userDeleted) => {
-            if (err) return res.status(500).send({ message: 'Error al borrar el Usuario' })
-            return res.status(200).send({ message: 'Usuario Eliminado', user: userDeleted })
-        })
+function deleteUser(req, res) {
+    const userId = req.params.id
+    if (userId != req.user.sub) {
+        return res.status(500).send({ message: 'No posee los permisos para eliminar el Usuario' })
     }
 
-    function PROFILE(req, res) {
-        User.findOne({ userName: arrayC[1] }).exec((err, profile) => {
-            if (err) return res.status(500).send({ message: 'Error en la peticion' })
-            return res.status(200).send({ perfil: profile })
-        })
-    }
+    User.findByIdAndDelete(userId, (err, userDeleted) => {
+        if (err) return res.status(500).send({ message: 'Error al borrar el Usuario' })
+        return res.status(200).send({ message: 'Usuario Eliminado', user: userDeleted })
+    })
+}
 
-    function FOLLOW(username) {
+function PROFILE(req, res) {
+    User.findOne({ userName: arrayC[1] }).exec((err, profile) => {
+        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+        return res.status(200).send({ perfil: profile })
+    })
+}
 
-    }
+function FOLLOW(username) {
 
-    function UNFOLLOW(username) {
+}
 
-    }
+function UNFOLLOW(username) {
+
+}
