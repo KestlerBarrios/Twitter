@@ -84,15 +84,12 @@ function LOGIN(req, res) {
     var password = arrayC[2]
     User.findOne({ userName: username }, (err, user) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })
-        console.log(user);
+        if (!user) return res.status(404).send({message: 'Usuario no encontrado'})
         if (user) {
-            bcrypt.compare(password, user.password, (err, check) => {
-                console.log(password);
-                console.log(user.password);
-                
-                
+            bcrypt.compare(password, user.password, (err, check) => { 
+                console.log(user);
                 if (check) {
-                    if (arrayC[3]) {
+                    if (arrayC[3]) {    
                         return res.status(200).send({ token: jwt.createToken(user) })
                     } else {
                         user.password = undefined
