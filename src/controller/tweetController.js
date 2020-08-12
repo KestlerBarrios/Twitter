@@ -1,18 +1,15 @@
 'use strict'
 
 const Tweet = require('../models/Tweet')
-const { text } = require('body-parser')
 
 exports.ADD_TWEET = function (req, res, arrayC) {
     var tweet = new Tweet()
     arrayC.shift()
     var textTweet = arrayC.join(' ')
 
-    if (tweetId != req.user.sub) {
-        return res.status(500).send({ message: 'No posee los permisos para añadir un Tweet' })
-    }
     if (textTweet) {
         tweet.text = textTweet
+        tweet.
         tweet.save((err, tweetSave) => {
             if (err) return res.status(500).send({ message: 'Error al guardar el Tweet.' })
             if (tweetSave) {
@@ -27,10 +24,6 @@ exports.ADD_TWEET = function (req, res, arrayC) {
 }
 
 exports.DELETE_TWEET = function (req, res, arrayC) {
-
-    if (tweetId != req.user.sub) {
-        return res.status(500).send({ message: 'No posee los permisos para Eliminar el Tweet' })
-    }
     const tweetId = arrayC[1]
     Tweet.findByIdAndDelete(tweetId, (err, tweetDeleted) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })

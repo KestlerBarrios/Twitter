@@ -4,7 +4,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 var FollowersSchema = Schema({
-    userName: {type: Schema.ObjectId, ref: 'usuario'},
+    userName: String,
+    follower: [{
+        userName: String
+    }]
 })
 
 module.exports = mongoose.model('seguidores', FollowersSchema)
