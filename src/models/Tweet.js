@@ -5,8 +5,15 @@ const Schema = mongoose.Schema;
 
 var TweetSchema = Schema({
     userName: String,
-    tweet: [{
-        text: String,
+    text: String,
+    cantidadLikes: Number,
+    cantidadComment: Number,
+    likes: [{
+        user: String
+    }],
+    comments: [{
+        userNameComent: String,
+        description: String
     }]
 })
 

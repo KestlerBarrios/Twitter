@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt-nodejs')
 const jwt = require('../services/jwt')
 
 const User = require('../models/User')
+const Tweet = require('../models/Tweet')
 const tweetController = require('../controller/tweetController')
 var arrayC = []
 
@@ -70,7 +71,7 @@ function REGISTER(req, res) {
                         } else {
                             res.status(404).send({ message: `No se ha podido registrar ${username} ` })
                         }
-                    })
+                    })  
                 })
             }
         })
@@ -84,12 +85,12 @@ function LOGIN(req, res) {
     var password = arrayC[2]
     User.findOne({ userName: username }, (err, user) => {
         if (err) return res.status(500).send({ message: 'Error en la peticion' })
-        if (!user) return res.status(404).send({message: 'Usuario no encontrado'})
+        if (!user) return res.status(404).send({ message: 'Usuario no encontrado' })
         if (user) {
-            bcrypt.compare(password, user.password, (err, check) => { 
+            bcrypt.compare(password, user.password, (err, check) => {
                 console.log(user);
                 if (check) {
-                    if (arrayC[3]) {    
+                    if (arrayC[3]) {
                         return res.status(200).send({ token: jwt.createToken(user) })
                     } else {
                         user.password = undefined

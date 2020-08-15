@@ -4,7 +4,7 @@ const mongoose = require('mongoose')
 const app = require('./app')
 
 mongoose.Promise = global.Promise
-mongoose.connect('mongodb://localhost:27017/Twitter', { useNewUrlParser: true, useUnifiedTopology: true }).then(() => {
+mongoose.connect('mongodb://localhost:27017/Twitter', { useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false}).then(() => {
     console.log('Se conecto exitosamente con la Base de Datos');
     app.set('port', process.env.PORT || 3000)
     app.listen(app.get('port'), () => {
