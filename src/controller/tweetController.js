@@ -2,6 +2,7 @@
 
 const Tweet = require('../models/Tweet')
 const User = require('../models/User')
+const ReTweet = require('../models/Retweet')
 
 exports.ADD_TWEET = function (req, res, arrayC) {
     var userName = req.user.userName
@@ -73,7 +74,21 @@ exports.VIEW_TWEETS = function (req, res, arrayC) {
     var userName = arrayC[1]
 
     if (userName) {
-        Tweet.find({ userName: userName }, (err, tweets) => { })
+        Tweet.find({ userName: userName }, (err, tweets) => { 
+            if (err) return res.status(500).send({message: 'Error en la peticion'})
 
+            if (tweets) {
+                ReTweet.find((err, reTweets)=>{
+                    if (err) return res.status(500).send({message: 'Error en la peticion'})
+                    if (!reTweets) return res.status(404).send({tweets: tweets})
+                    if (reTweets) return res.status(200).send({TweetOriginal: tweets, ReTweet:reTweets})
+                })
+                
+                
+            }
+        })
+
+    }else{
+        return res.status(500).send({message: 'Rellene los datos necesarios'})
     }
 }

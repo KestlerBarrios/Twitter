@@ -3,11 +3,11 @@
 const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
-var FollowedSchema = Schema({
+const FollowedSchema = Schema({
     userName: String,
     followed: [{
-        userName: String
+        followedUser: String
     }]
 })
 
-module.exports = mongoose.model('seguidos', FollowedSchema)
+module.exports = mongoose.model('followed', FollowedSchema)

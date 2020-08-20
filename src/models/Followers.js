@@ -6,7 +6,7 @@ const Schema = mongoose.Schema
 var FollowersSchema = Schema({
     userName: String,
     follower: [{
-        userName: String
+        followersUser: String
     }]
 })
 

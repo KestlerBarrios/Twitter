@@ -4,8 +4,9 @@ const bcrypt = require('bcrypt-nodejs')
 const jwt = require('../services/jwt')
 
 const User = require('../models/User')
-const Tweet = require('../models/Tweet')
 const tweetController = require('../controller/tweetController')
+const Followed = require('../models/Followed')
+const Followers = require('../models/Followers')
 var arrayC = []
 
 exports.commands = function (req, res) {
@@ -28,7 +29,7 @@ exports.commands = function (req, res) {
             PROFILE(req, res)
             break;
         case "follow":
-            FOLLOW(req, res)
+            FOLLOW(req, res, arrayC)
             break;
         case "unfollow":
             UNFOLLOW(req, res)
@@ -42,7 +43,7 @@ exports.commands = function (req, res) {
         case "edit_tweet":
             tweetController.EDIT_TWEET(req, res, arrayC)
             break;
-        case "view_tweet":
+        case "view_tweets":
             tweetController.VIEW_TWEETS(req, res, arrayC)
             break;
         default:
@@ -71,7 +72,7 @@ function REGISTER(req, res) {
                         } else {
                             res.status(404).send({ message: `No se ha podido registrar ${username} ` })
                         }
-                    })  
+                    })
                 })
             }
         })
@@ -113,7 +114,58 @@ function PROFILE(req, res) {
     })
 }
 
-function FOLLOW(username) {
+function FOLLOW(req, res, arrayC) {
+    var userName = req.user.userName
+    var user = arrayC[1]
+
+    if (user) {
+        User.findOne({ userName: userName }, (err, userFollowed) => {
+            if (err) return res.status(500).send({ message: 'Error en la peticion' })
+            if (!userFollowed) return res.status(404).send({ message: 'El Usuario no Existe' })
+            if (userFollowed) {
+                if (userFollowed.userName == user) {
+                    return res.status(200).send({ message: 'No te puedes seguir a ti mismo' })
+
+                } else {
+                    Followed.findOne({ username: userName, 'followed.user': user }, (err, userFollowed) => {
+                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                        if (!userFollowed) {
+                            Followed.findOneAndUpdate({ userName: userName }, { $push: { followed: { followedUser: user } } }, (err, followedUpdate) => {
+                                if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                if (!followedUpdate) return res.status(404).send({ message: 'Usuario no encontrado' })
+                                if (followedUpdate) {
+                                    User.findOneAndUpdate({ userName: userName }, { $inc: { "following": 1 } }, { new: true }, (err, followedSum) => {
+                                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                        if (!followedSum) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
+                                        if (followedSum) {
+                                            Followers.findOneAndUpdate({ userName: user }, { $push: { followers: { followersUser: userName } } }, { new: true }, (err, followerUpdate) => {
+                                                if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                                if (!followerUpdate) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
+                                                if (followerUpdate) {
+                                                    User.findOneAndUpdate({ userName: userName }, { $inc: { "followers": 1 } }, { new: true }, (err,followerSum) => {
+                                                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                                        if(!followerSum) return res.status(404).send({message: 'No se pudo sumar el seguidor'})
+                                                        if(followerSum) return res.status(200).send({followed: followedUpdate})
+                                                    })
+                                                }
+
+                                            })
+                                        }
+                                    })
+                                }
+                            })
+                        } else {
+                            return res.status(404).send({ message: 'Ya sigues a este usuario' })
+                        }
+
+                    })
+                }
+            }
+
+        })
+
+    }
+
 
 }
 
