@@ -32,7 +32,7 @@ exports.commands = function (req, res) {
             FOLLOW(req, res, arrayC)
             break;
         case "unfollow":
-            UNFOLLOW(req, res)
+            UNFOLLOW(req, res, arrayC)
             break;
         case "add_tweet":
             tweetController.ADD_TWEET(req, res, arrayC)
@@ -161,7 +161,6 @@ function FOLLOW(req, res, arrayC) {
                                                         if (followerSum) return res.status(200).send({ followed: followedUpdate })
                                                     })
                                                 }
-
                                             })
                                         }
                                     })
@@ -170,19 +169,14 @@ function FOLLOW(req, res, arrayC) {
                         } else {
                             return res.status(404).send({ message: 'Ya sigues a este usuario' })
                         }
-
                     })
                 }
             }
-
         })
-
     }
-
-
 }
 
-function UNFOLLOW(username) {
+function UNFOLLOW(req, res, arrayC) {
     var userName = req.user.userName
     var user = arrayC[1]
 
@@ -193,27 +187,26 @@ function UNFOLLOW(username) {
             if (userFollowed) {
                 if (userFollowed.userName == user) {
                     return res.status(200).send({ message: 'No te puedes seguir a ti mismo' })
-
                 } else {
                     Followed.findOne({ username: userName, 'followed.user': user }, (err, userFollowed) => {
-                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                        if (err) return res.status(500).send({ message: 'Error en la peticion Find' })
                         if (!userFollowed) {
                             Followed.findOneAndUpdate({ userName: userName }, { $pull: { followed: { followedUser: user } } }, { new: true }, (err, followedUpdate) => {
-                                if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                if (err) return res.status(500).send({ message: 'Error en la peticion Update' })
                                 if (!followedUpdate) return res.status(404).send({ message: 'Usuario no encontrado' })
                                 if (followedUpdate) {
                                     User.findOneAndUpdate({ userName: userName }, { $inc: { "following": -1 } }, { new: true }, (err, followedSum) => {
                                         if (err) return res.status(500).send({ message: 'Error en la peticion' })
-                                        if (!followedSum) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
+                                        if (!followedSum) return res.status(404).send({ message: 'No se pudo sumar el seguido' })
                                         if (followedSum) {
                                             Followers.findOneAndUpdate({ userName: user }, { $pull: { followers: { followersUser: userName } } }, { new: true }, (err, followerUpdate) => {
                                                 if (err) return res.status(500).send({ message: 'Error en la peticion' })
-                                                if (!followerUpdate) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
+                                                if (!followerUpdate) return res.status(404).send({ message: 'No se pudo sumar el usuario2' })
                                                 if (followerUpdate) {
                                                     User.findOneAndUpdate({ userName: userName }, { $inc: { "followers": -1 } }, { new: true }, (err, followerSum) => {
                                                         if (err) return res.status(500).send({ message: 'Error en la peticion' })
                                                         if (!followerSum) return res.status(404).send({ message: 'No se pudo sumar el seguidor' })
-                                                        if (followerSum) return res.status(200).send({ followed: followedUpdate })
+                                                        if (followerSum) return res.status  (200).send({ followed: followedUpdate })
                                                     })
                                                 }
 
