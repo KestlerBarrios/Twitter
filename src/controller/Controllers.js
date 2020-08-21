@@ -56,8 +56,13 @@ function REGISTER(req, res) {
     var username = arrayC[1]
     var password = arrayC[3]
     var user = new User()
+    var followed = new Followed()
+    var followers = new Followers()
     if (username && password) {
         user.userName = username
+        followed.userName = username
+        followers.userName = username
+
         User.find({ userName: username }).exec((err, users) => {
             if (err) return res.status(500).send({ message: 'Error en la peticion.' })
             if (users && users.length >= 1) {
@@ -68,6 +73,14 @@ function REGISTER(req, res) {
                     user.save((err, userSave) => {
                         if (err) return res.status(500).send({ message: 'Error al guardar el Usuario.' })
                         if (userSave) {
+                            followed.save((err, followedSave) => {
+                                if (err) return res.status(500).send({ message: 'Error al guardar el los Seguidos.' })
+                                if (!followedSave) res.status(404).send({ message: `No se han podido registrar los seguidos de ${username} ` })
+                            })
+                            followers.save((err, followersSave) => {
+                                if (err) return res.status(500).send({ message: 'Error al guardar los Seguidores.' })
+                                if (!followersSave) res.status(404).send({ message: `No se han podido registrar los seguidores de ${username} ` })
+                            })
                             res.status(200).send({ usuario: userSave })
                         } else {
                             res.status(404).send({ message: `No se ha podido registrar ${username} ` })
@@ -130,7 +143,7 @@ function FOLLOW(req, res, arrayC) {
                     Followed.findOne({ username: userName, 'followed.user': user }, (err, userFollowed) => {
                         if (err) return res.status(500).send({ message: 'Error en la peticion' })
                         if (!userFollowed) {
-                            Followed.findOneAndUpdate({ userName: userName }, { $push: { followed: { followedUser: user } } }, (err, followedUpdate) => {
+                            Followed.findOneAndUpdate({ userName: userName }, { $push: { followed: { followedUser: user } } }, { new: true }, (err, followedUpdate) => {
                                 if (err) return res.status(500).send({ message: 'Error en la peticion' })
                                 if (!followedUpdate) return res.status(404).send({ message: 'Usuario no encontrado' })
                                 if (followedUpdate) {
@@ -142,10 +155,10 @@ function FOLLOW(req, res, arrayC) {
                                                 if (err) return res.status(500).send({ message: 'Error en la peticion' })
                                                 if (!followerUpdate) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
                                                 if (followerUpdate) {
-                                                    User.findOneAndUpdate({ userName: userName }, { $inc: { "followers": 1 } }, { new: true }, (err,followerSum) => {
+                                                    User.findOneAndUpdate({ userName: userName }, { $inc: { "followers": 1 } }, { new: true }, (err, followerSum) => {
                                                         if (err) return res.status(500).send({ message: 'Error en la peticion' })
-                                                        if(!followerSum) return res.status(404).send({message: 'No se pudo sumar el seguidor'})
-                                                        if(followerSum) return res.status(200).send({followed: followedUpdate})
+                                                        if (!followerSum) return res.status(404).send({ message: 'No se pudo sumar el seguidor' })
+                                                        if (followerSum) return res.status(200).send({ followed: followedUpdate })
                                                     })
                                                 }
 
@@ -170,5 +183,51 @@ function FOLLOW(req, res, arrayC) {
 }
 
 function UNFOLLOW(username) {
+    var userName = req.user.userName
+    var user = arrayC[1]
 
+    if (user) {
+        User.findOne({ userName: userName }, (err, userFollowed) => {
+            if (err) return res.status(500).send({ message: 'Error en la peticion' })
+            if (!userFollowed) return res.status(404).send({ message: 'El Usuario no Existe' })
+            if (userFollowed) {
+                if (userFollowed.userName == user) {
+                    return res.status(200).send({ message: 'No te puedes seguir a ti mismo' })
+
+                } else {
+                    Followed.findOne({ username: userName, 'followed.user': user }, (err, userFollowed) => {
+                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                        if (!userFollowed) {
+                            Followed.findOneAndUpdate({ userName: userName }, { $pull: { followed: { followedUser: user } } }, { new: true }, (err, followedUpdate) => {
+                                if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                if (!followedUpdate) return res.status(404).send({ message: 'Usuario no encontrado' })
+                                if (followedUpdate) {
+                                    User.findOneAndUpdate({ userName: userName }, { $inc: { "following": -1 } }, { new: true }, (err, followedSum) => {
+                                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                        if (!followedSum) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
+                                        if (followedSum) {
+                                            Followers.findOneAndUpdate({ userName: user }, { $pull: { followers: { followersUser: userName } } }, { new: true }, (err, followerUpdate) => {
+                                                if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                                if (!followerUpdate) return res.status(404).send({ message: 'No se pudo sumar el usuario' })
+                                                if (followerUpdate) {
+                                                    User.findOneAndUpdate({ userName: userName }, { $inc: { "followers": -1 } }, { new: true }, (err, followerSum) => {
+                                                        if (err) return res.status(500).send({ message: 'Error en la peticion' })
+                                                        if (!followerSum) return res.status(404).send({ message: 'No se pudo sumar el seguidor' })
+                                                        if (followerSum) return res.status(200).send({ followed: followedUpdate })
+                                                    })
+                                                }
+
+                                            })
+                                        }
+                                    })
+                                }
+                            })
+                        } else {
+                            return res.status(404).send({ message: 'Ya sigues a este usuario' })
+                        }
+                    })
+                }
+            }
+        })
+    }
 }
