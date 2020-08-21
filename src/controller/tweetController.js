@@ -92,3 +92,19 @@ exports.VIEW_TWEETS = function (req, res, arrayC) {
         return res.status(500).send({message: 'Rellene los datos necesarios'})
     }
 }
+
+exports.LIKE_TWEETS = function (req, res, arrayC) {
+    
+}
+
+exports.DISLIKE_TWEETS = function (req, res, arrayC) {
+    
+}
+
+exports.REPLY_TWEET = function (req, res, arrayC) {
+    
+}
+
+exports.RETWEET = function (req, res, arrayC) {
+    
+}
