@@ -10,7 +10,7 @@ const ReTweetSchema = Schema({
     textRetweet: String,
     tweet: {
         tweetId: { type: Schema.ObjectId, ref: 'tweet' },
-        tweet: String,
+        userTweet: String,
         textTweet: String
     }
 })

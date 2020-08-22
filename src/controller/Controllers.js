@@ -19,12 +19,6 @@ exports.commands = function (req, res) {
         case "login":
             LOGIN(req, res)
             break;
-        case "edituser":
-            editUser(req, res)
-            break;
-        case "deleteuser":
-            deleteUser(req, res)
-            break;
         case "profile":
             PROFILE(req, res)
             break;
@@ -44,6 +38,18 @@ exports.commands = function (req, res) {
             tweetController.EDIT_TWEET(req, res, arrayC)
             break;
         case "view_tweets":
+            tweetController.VIEW_TWEET(req, res, arrayC)
+            break;
+        case "like_tweet":
+            tweetController.LIKE_TWEET(req, res, arrayC)
+            break;
+        case "dislike_tweet":
+            tweetController.REPLY_TWEET(req, res, arrayC)
+            break;
+        case "reply_tweet":
+            tweetController.RETWEET(req, res, arrayC)
+            break;
+        case "retweet":
             tweetController.VIEW_TWEETS(req, res, arrayC)
             break;
         default:
@@ -206,7 +212,7 @@ function UNFOLLOW(req, res, arrayC) {
                                                     User.findOneAndUpdate({ userName: userName }, { $inc: { "followers": -1 } }, { new: true }, (err, followerSum) => {
                                                         if (err) return res.status(500).send({ message: 'Error en la peticion' })
                                                         if (!followerSum) return res.status(404).send({ message: 'No se pudo sumar el seguidor' })
-                                                        if (followerSum) return res.status  (200).send({ followed: followedUpdate })
+                                                        if (followerSum) return res.status(200).send({ followed: followedUpdate })
                                                     })
                                                 }
 
